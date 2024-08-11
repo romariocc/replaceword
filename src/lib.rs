@@ -95,10 +95,26 @@ pub fn replace(
     Ok(())
 }
 
+fn type_of(value: &Value) -> &str {
+    match value {
+        Value::Null => "null",
+        Value::Bool(_) => "bool",
+        Value::Number(_) => "number",
+        Value::String(_) => "string",
+        Value::Array(_) => "array",
+        Value::Object(_) => "object",
+    }
+}
+
 fn replace_placeholders(xml: &mut String, data: &Value, parent_key: Option<&str>) {
+    if let Some(key) = parent_key {
+        println!("INICIANDO parent_key: {}", key);
+    } else {
+        println!("INICIANDO parent_key: None");
+    }
+
     let re =
-        Regex::new(r"\$\{(?:<\/?w:[^>]+>)*([a-zA-Z0-9_]+(?:\.[a-zA-Z0-9_]+)*)(?:<\/?w:[^>]+>)*\}")
-            .unwrap();
+        Regex::new(r"\$\{(?:<\/?w:[^>]+>)*((?:<\/?w:[^>]+>|\w|\.)*)(?:<\/?w:[^>]+>)*\}").unwrap();
 
     let mut result = xml.clone();
     println!("RESULTADO INICIAL: {}", xml);
@@ -110,6 +126,7 @@ fn replace_placeholders(xml: &mut String, data: &Value, parent_key: Option<&str>
             .unwrap()
             .replace_all(key_with_tags, "");
 
+        println!("key_with_tags {}", key_with_tags);
         println!("key_cleaned {}", key_cleaned);
 
         let composed_key = if let Some(parent) = parent_key {
@@ -119,10 +136,12 @@ fn replace_placeholders(xml: &mut String, data: &Value, parent_key: Option<&str>
         };
 
         if let Some(value) = get_nested_value(data, &composed_key) {
+            println!("Tipo do valor: {} para {}", type_of(value), &composed_key);
             match value {
                 Value::String(s) => {
                     println!("Substituindo placeholder {} por {}", composed_key, s);
                     result = result.replace(full_match, s);
+                    result = result.replace(full_match, key_with_tags);
                 }
                 Value::Number(n) => {
                     result = result.replace(full_match, &n.to_string());
@@ -130,11 +149,15 @@ fn replace_placeholders(xml: &mut String, data: &Value, parent_key: Option<&str>
                 Value::Array(arr) => {
                     println!("Value::Array -----------------");
                     let mut new_paragraphs = String::new();
+
+                    // Para cada item no array, clona o parágrafo correspondente e realiza a substituição
                     for item in arr {
-                        let mut cloned_xml = full_match.to_string();
-                        replace_placeholders(&mut cloned_xml, item, Some(&composed_key));
-                        new_paragraphs.push_str(&cloned_xml);
+                        let mut cloned_paragraph = full_match.to_string();
+                        replace_placeholders(&mut cloned_paragraph, item, Some(&composed_key));
+                        new_paragraphs.push_str(&cloned_paragraph);
                     }
+
+                    // Substitui o parágrafo original por todos os novos parágrafos gerados
                     result = result.replace(full_match, &new_paragraphs);
                 }
                 Value::Object(_) => {
@@ -157,7 +180,16 @@ fn get_nested_value<'a>(data: &'a Value, key: &str) -> Option<&'a Value> {
     let mut current_value = data;
 
     for k in keys {
-        if let Some(value) = current_value.get(k) {
+        if let Ok(index) = k.parse::<usize>() {
+            // Check if the key can be parsed as an integer (array index)
+            if let Some(array) = current_value.as_array() {
+                current_value = array.get(index)?;
+                println!("get_nested_value: {}", current_value);
+            } else {
+                return None;
+            }
+        } else if let Some(value) = current_value.get(k) {
+            // Otherwise treat it as an object key
             current_value = value;
         } else {
             return None;

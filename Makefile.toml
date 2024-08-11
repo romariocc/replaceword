@@ -21,7 +21,7 @@ script = [
     fi
     ''',
     "git tag v$(grep -m1 version Cargo.toml | sed -E 's/version = \"(.*)\"/\\1/')",
-    "git push origin master --tags",
+    "git push origin main --tags",
 ]
 
 [tasks.default]
