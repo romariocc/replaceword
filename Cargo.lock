@@ -720,7 +720,7 @@ checksum = "53a85b86a771b1c87058196170769dd264f66c0782acf1ae6cc51bfd64b39082"
 
 [[package]]
 name = "wordreplacelib"
-version = "0.1.4"
+version = "0.1.5"
 dependencies = [
  "docx-rs",
  "regex",
