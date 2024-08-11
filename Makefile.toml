@@ -9,13 +9,20 @@ args = ["watch", "-w", "src", "-x", "test -- --nocapture"]
 [tasks.bump-version]
 description = "Incrementa a versão, adiciona mudanças e cria uma tag Git, com uma descrição opcional"
 script_runner = "bash"
-script = ["cargo bump patch", "git add Cargo.toml Cargo.lock src", '''
+script = [
+    "cargo bump patch",
+    "git add Cargo.toml Cargo.lock src",
+    '''
+    VERSION=$(grep -m1 version Cargo.toml | sed -E 's/version = "(.*)"/\1/')
     if [ -z "${description}" ]; then
-        git commit -m "Bump versão para {{project.version}}"
+        git commit -m "Bump versão para ${VERSION}"
     else
-        git commit -m "Bump versão para {{project.version}} - ${description}"
+        git commit -m "Bump versão para ${VERSION} - ${description}"
     fi
-    ''', "git tag v{{project.version}}", "git push origin main --tags"]
+    ''',
+    "git tag v$(grep -m1 version Cargo.toml | sed -E 's/version = \"(.*)\"/\\1/')",
+    "git push origin master --tags",
+]
 
 [tasks.default]
 description = "Executa a task padrão"
