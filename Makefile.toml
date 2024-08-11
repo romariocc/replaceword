@@ -1,0 +1,22 @@
+[tasks.test]
+command = "cargo"
+args = ["test"]
+
+[tasks.watch-test]
+command = "cargo"
+args = ["watch", "-w", "src", "-x", "test -- --nocapture"]
+
+[tasks.bump-version]
+description = "Incrementa a versão, adiciona mudanças e cria uma tag Git, com uma descrição opcional"
+script_runner = "bash"
+script = ["cargo bump patch", "git add Cargo.toml Cargo.lock src", '''
+    if [ -z "${description}" ]; then
+        git commit -m "Bump versão para {{project.version}}"
+    else
+        git commit -m "Bump versão para {{project.version}} - ${description}"
+    fi
+    ''', "git tag v{{project.version}}", "git push origin main --tags"]
+
+[tasks.default]
+description = "Executa a task padrão"
+dependencies = ["watch-test"]
