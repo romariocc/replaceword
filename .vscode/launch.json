@@ -1,0 +1,32 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug Library Test with GDB",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/target/debug/deps/wordreplacelib-<suffix>",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "miDebuggerPath": "/usr/bin/gdb", // Altere o caminho conforme necessário
+            "preLaunchTask": "cargo test",
+            "sourceFileMap": {
+                "/mnt/c": "C:\\"
+            },
+            "setupCommands": [
+                {
+                    "description": "Aumentar o comprimento das strings no depurador",
+                    "text": "-gdb-set target-charset UTF-8"
+                },
+                {
+                    "description": "Ajustar o comprimento máximo das strings no depurador",
+                    "text": "set print elements 0"
+                }
+            ]
+        }
+    ]
+}
