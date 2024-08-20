@@ -5,6 +5,7 @@ use zip::{write::FileOptions, ZipArchive, ZipWriter};
 
 use regex::Regex;
 
+use docx_rs::*;
 use std::fs::File;
 use std::io::BufReader;
 

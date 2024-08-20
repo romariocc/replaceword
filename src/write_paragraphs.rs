@@ -24,6 +24,8 @@ pub fn modify_docx_paragraphs(
     // Converter o buffer de bytes para uma string
     let doc_xml_str = String::from_utf8(doc_xml)?;
 
+    println!("input_path: {}", input_path);
+    println!("output_path: {}", output_path);
     // Modificar o conteúdo dos parágrafos no XML
     let modified_xml = modify_paragraphs_in_xml(&doc_xml_str, data)?;
 

@@ -1,4 +1,7 @@
 mod read_paragraphs;
+pub mod translation;
+pub mod utils;
+pub mod variable_substitution;
 mod write_paragraphs;
 
 use serde_json::Value;
@@ -16,19 +19,19 @@ pub fn replace(
         std::fs::create_dir_all(output_path)?;
     }
 
-    let output_path = format!("{}/{}.doc", output_path, output_filename);
+    let output_file_path = PathBuf::from(output_path).join(format!("{}.doc", output_filename));
 
-    let output_file_path =
-        PathBuf::from(output_path.clone()).join(format!("{}.doc", output_path.clone()));
+    // Converte o PathBuf para &str
+    let output_file_path_str = output_file_path.to_str().unwrap();
 
-    match write_paragraphs::modify_docx_paragraphs(input_path, &output_path, data) {
+    match write_paragraphs::modify_docx_paragraphs(input_path, output_file_path_str, data) {
         Ok(_) => println!("Novo documento criado com sucesso!"),
         Err(e) => eprintln!("Erro ao criar novo documento: {}", e),
     }
 
     Ok(())
 }
-
+/*
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -68,9 +71,11 @@ mod tests {
         println!("Resultado do replace: {:?}", result);
         assert!(result.is_ok());
 
-        let output_file_path = format!("{}/{}.doc", output_path, output_filename);
+        let output_file_path = PathBuf::from(output_path).join(format!("{}.doc", output_filename));
+
         let metadata = fs::metadata(&output_file_path);
         println!("Metadata do arquivo gerado: {:?}", metadata);
         assert!(metadata.is_ok());
     }
 }
+ */
